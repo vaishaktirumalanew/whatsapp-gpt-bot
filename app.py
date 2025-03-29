@@ -26,30 +26,41 @@ For each topic:
 Make it WhatsApp-friendly.
 """
 
-    response = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {GROQ_API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "mixtral-8x7b-32768",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.8
-        }
-    )
+    print("🔄 Sending request to Groq...")
+    print("Prompt:", prompt)
 
-    data = response.json()
+    try:
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "mixtral-8x7b-32768",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.8
+            }
+        )
 
-    if "choices" in data:
-        return data["choices"][0]["message"]["content"]
-    else:
-        print("❌ Groq API Error: ", response.status_code, response.text)
-        return f"⚠️ Something went wrong: {response.status_code}. Try again later."    
+        print("✅ Groq status code:", response.status_code)
+
+        data = response.json()
+        print("🧠 Groq response body:", data)
+
+        if "choices" in data and data["choices"]:
+            return data["choices"][0]["message"]["content"]
+        else:
+            return "⚠️ I couldn’t get content ideas right now. Try again in a few seconds."
+
+    except Exception as e:
+        print("❌ Exception in Groq call:", str(e))
+        return "⚠️ Oops! Something broke while getting your content ideas."
+
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     incoming_msg = request.form.get("Body")
-    print(f"✅ User said: {incoming_msg}")
+    print(f"📩 User said: {incoming_msg}")
 
     reply = get_trend_response(incoming_msg)
 
