@@ -44,9 +44,8 @@ Make it WhatsApp-friendly.
     if "choices" in data:
         return data["choices"][0]["message"]["content"]
     else:
-        # Log the full error for debugging
-        print("❌ Groq API Error:", data)
-        return "Hmm… I couldn’t generate ideas right now. Try again in a few seconds!"
+        print("❌ Groq API Error: ", response.status_code, response.text)
+        return f"⚠️ Something went wrong: {response.status_code}. Try again later."    
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     incoming_msg = request.form.get("Body")
