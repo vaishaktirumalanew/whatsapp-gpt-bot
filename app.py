@@ -26,7 +26,7 @@ For each topic:
 Make it WhatsApp-friendly.
 """
     response = client.chat.completions.create(
-        model="gpt-4-turbo",  # Use "gpt-3.5-turbo" if you don’t have GPT-4 access
+        model="gpt-4-turbo",  # Use "gpt-4o" if you don’t have GPT-4 access
         messages=[{"role": "user", "content": prompt}],
         temperature=0.8
     )
