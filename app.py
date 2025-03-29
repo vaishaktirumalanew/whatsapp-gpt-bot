@@ -1,14 +1,14 @@
 from flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
-from openai import OpenAI
+import requests
 import os
 from dotenv import load_dotenv
 
-# Load .env for local testing
+# Load environment variables (for local use)
 load_dotenv()
 
-# Initialize OpenAI client
-client = OpenAI()
+# Get Groq API key from environment
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 app = Flask(__name__)
 
@@ -25,12 +25,22 @@ For each topic:
 
 Make it WhatsApp-friendly.
 """
-    response = client.chat.completions.create(
-        model="gpt-4o",  # Use "gpt-4o" if you don’t have GPT-4 access
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.8
+
+    response = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "mixtral-8x7b-32768",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.8
+        }
     )
-    return response.choices[0].message.content
+
+    data = response.json()
+    return data["choices"][0]["message"]["content"]
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
