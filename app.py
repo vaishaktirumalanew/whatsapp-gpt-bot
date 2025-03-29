@@ -3,8 +3,9 @@ from twilio.twiml.messaging_response import MessagingResponse
 import requests
 import os
 from dotenv import load_dotenv
+import sys
 
-# Load environment variables (for local use)
+# Load environment variables (for local dev)
 load_dotenv()
 
 # Get Groq API key from environment
@@ -26,8 +27,8 @@ For each topic:
 Make it WhatsApp-friendly.
 """
 
-    print("🔄 Sending request to Groq...")
-    print("Prompt:", prompt)
+    print("🔄 Sending request to Groq...", flush=True)
+    print("Prompt:", prompt, flush=True)
 
     response = requests.post(
         "https://api.groq.com/openai/v1/chat/completions",
@@ -42,12 +43,12 @@ Make it WhatsApp-friendly.
         }
     )
 
-    print("✅ Groq status code:", response.status_code)
-    print("🧠 Raw response text:", response.text)
+    print("✅ Groq status code:", response.status_code, flush=True)
+    print("🧠 Raw response text:", response.text, flush=True)
 
     try:
         data = response.json()
-        print("🧠 Parsed JSON:", data)
+        print("🧠 Parsed JSON:", data, flush=True)
 
         if "choices" in data and data["choices"]:
             return data["choices"][0]["message"]["content"]
@@ -55,13 +56,13 @@ Make it WhatsApp-friendly.
             return "⚠️ I couldn’t get content ideas right now. Try again in a few seconds."
 
     except Exception as e:
-        print("❌ Exception while parsing Groq response:", str(e))
+        print("❌ Exception while parsing Groq response:", str(e), flush=True)
         return "⚠️ Oops! Something broke while getting your content ideas."
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     incoming_msg = request.form.get("Body")
-    print(f"📩 User said: {incoming_msg}")
+    print(f"📩 User said: {incoming_msg}", flush=True)
 
     reply = get_trend_response(incoming_msg)
 
