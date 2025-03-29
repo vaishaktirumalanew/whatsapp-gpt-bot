@@ -37,7 +37,7 @@ Make it WhatsApp-friendly.
             "Content-Type": "application/json"
         },
         json={
-            "model": "mixtral-8x7b-instruct",
+            "model": "llama-3.3-70b-versatile",
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.8
         }
