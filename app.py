@@ -1,4 +1,4 @@
-from flask import Flask, request, Response
+kfrom flask import Flask, request, Response
 from twilio.twiml.messaging_response import MessagingResponse
 import requests
 import os
@@ -29,24 +29,25 @@ Make it WhatsApp-friendly.
     print("🔄 Sending request to Groq...")
     print("Prompt:", prompt)
 
+    response = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "mixtral-8x7b-32768",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.8
+        }
+    )
+
+    print("✅ Groq status code:", response.status_code)
+    print("🧠 Raw response text:", response.text)
+
     try:
-        response = requests.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "mixtral-8x7b-32768",
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.8
-            }
-        )
-
-        print("✅ Groq status code:", response.status_code)
-
         data = response.json()
-        print("🧠 Groq response body:", data)
+        print("🧠 Parsed JSON:", data)
 
         if "choices" in data and data["choices"]:
             return data["choices"][0]["message"]["content"]
@@ -54,7 +55,7 @@ Make it WhatsApp-friendly.
             return "⚠️ I couldn’t get content ideas right now. Try again in a few seconds."
 
     except Exception as e:
-        print("❌ Exception in Groq call:", str(e))
+        print("❌ Exception while parsing Groq response:", str(e))
         return "⚠️ Oops! Something broke while getting your content ideas."
 
 @app.route("/whatsapp", methods=["POST"])
