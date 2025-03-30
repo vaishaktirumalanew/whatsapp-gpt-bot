@@ -21,6 +21,7 @@ user_country_memory = {}
 
 # ✅ Fetch top trending tech titles from Reddit
 def fetch_reddit_trends(subreddit="technology", limit=3):
+    print("✅ Reddit ENV:", REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT, flush=True)
     reddit = praw.Reddit(
         client_id=REDDIT_CLIENT_ID,
         client_secret=REDDIT_CLIENT_SECRET,
