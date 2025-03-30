@@ -3,32 +3,43 @@ from twilio.twiml.messaging_response import MessagingResponse
 import requests
 import os
 from dotenv import load_dotenv
-import sys
 
-# Load environment variables (for local dev)
 load_dotenv()
 
-# Get Groq API key from environment
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 app = Flask(__name__)
 
-def get_trend_response(user_message):
+# Store user info temporarily (for demo purposes)
+user_country_memory = {}
+
+def get_trend_response(user_message, user_country):
     prompt = f"""
-You are a content trend assistant. Based on this message: "{user_message}",
-provide 3 trending content topics from areas like X, movies, politics, food, or history.
+You're a personal content trend assistant for Instagram tech influencers.
 
-For each topic:
-- Suggest a catchy hook
-- Recommend tools for creation (e.g., CapCut, Canva)
-- Suggest the best time to post
-- Estimate how long the trend will last
+Based on the message: "{user_message}" — generate a list of 3 *tech-related trending content ideas* from what’s popular on Instagram today.
 
-Make it WhatsApp-friendly.
+Each idea should include:
+- A bold topic title
+- A catchy hook to grab attention
+- A relevant tool to create content (e.g., CapCut, Meta AI, phone camera, etc.)
+- The *best time to post* based on this country: "{user_country}"
+- An estimate of how long this trend will stay hot
+
+Format it *clearly for WhatsApp* like this:
+
+👨‍💻 *Today's Tech Trends for Instagram Creators*
+
+1️⃣ *Topic Name*  
+🪝 Hook: "..."  
+📲 Tool: ...  
+📍 Best Time to Post ({user_country}): ...  
+🕒 Trend lasts: ...
+
+Make it short, viral-friendly, and helpful for Instagram creators.
 """
 
-    print("🔄 Sending request to Groq...", flush=True)
-    print("Prompt:", prompt, flush=True)
+    print("🔁 Sending to Groq...", flush=True)
 
     response = requests.post(
         "https://api.groq.com/openai/v1/chat/completions",
@@ -43,33 +54,40 @@ Make it WhatsApp-friendly.
         }
     )
 
-    print("✅ Groq status code:", response.status_code, flush=True)
-    print("🧠 Raw response text:", response.text, flush=True)
+    print("✅ Status:", response.status_code, flush=True)
+    print("🧠 Raw:", response.text, flush=True)
 
     try:
         data = response.json()
-        print("🧠 Parsed JSON:", data, flush=True)
-
-        if "choices" in data and data["choices"]:
-            return data["choices"][0]["message"]["content"]
-        else:
-            return "⚠️ I couldn’t get content ideas right now. Try again in a few seconds."
-
+        return data["choices"][0]["message"]["content"]
     except Exception as e:
-        print("❌ Exception while parsing Groq response:", str(e), flush=True)
-        return "⚠️ Oops! Something broke while getting your content ideas."
+        print("❌ Failed to parse:", str(e), flush=True)
+        return "⚠️ I couldn’t fetch trends right now. Try again soon."
 
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
-    incoming_msg = request.form.get("Body")
-    print(f"📩 User said: {incoming_msg}", flush=True)
+    incoming_msg = request.form.get("Body").strip()
+    from_number = request.form.get("From")
 
-    reply = get_trend_response(incoming_msg)
+    print(f"📩 From {from_number}: {incoming_msg}", flush=True)
 
-    twilio_resp = MessagingResponse()
-    twilio_resp.message(reply)
+    resp = MessagingResponse()
 
-    return Response(str(twilio_resp), mimetype="application/xml"), 200
+    # Check if we have a country stored
+    user_country = user_country_memory.get(from_number)
+
+    if not user_country:
+        if incoming_msg.lower() in ["india", "us", "uk", "germany", "canada"]:
+            user_country_memory[from_number] = incoming_msg
+            resp.message(f"✅ Got it! You're in {incoming_msg}. Now send me a keyword like 'trending' or 'tech'.")
+        else:
+            resp.message("🌍 Hey! Before I send trends — tell me which country you're in (e.g. India, US, UK):")
+        return Response(str(resp), mimetype="application/xml"), 200
+
+    # Country known — send trends
+    reply = get_trend_response(incoming_msg, user_country)
+    resp.message(reply)
+    return Response(str(resp), mimetype="application/xml"), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
