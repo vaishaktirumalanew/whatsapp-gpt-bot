@@ -10,9 +10,9 @@ load_dotenv()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Reddit credentials
-REDDIT_CLIENT_ID = os.getenv("kVOnmpoBa8W0GxF4kIOvCQ")
-REDDIT_CLIENT_SECRET = os.getenv("owkJ70qd-toMz2cP8_42Qm6h0yJgPQ")
-REDDIT_USER_AGENT = os.getenv("whatsapp-trend-bot")
+REDDIT_CLIENT_ID = os.environ["REDDIT_CLIENT_ID"]
+REDDIT_CLIENT_SECRET = os.environ["REDDIT_CLIENT_SECRET"]
+REDDIT_USER_AGENT = os.environ["REDDIT_USER_AGENT"]
 
 app = Flask(__name__)
 
