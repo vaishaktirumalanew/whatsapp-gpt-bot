@@ -3,3 +3,4 @@ openai
 twilio
 python-dotenv
 requests
+praw
