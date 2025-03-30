@@ -73,22 +73,23 @@ Then suggest:
 Format output cleanly for WhatsApp.
 """
 
-    response = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {GROQ_API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "llama-3.3-70b-versatile",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.8
-        }
-    )
+    try:
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "llama-3.3-70b-versatile",
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.8
+            }
+        )
 
-        try:
         data = response.json()
         return data["choices"][0]["message"]["content"] + f"\n\nTo see more trending topics from r/{subreddit}, reply with \"more\"."
+
     except Exception as e:
         print("❌ Groq parse error:", str(e), flush=True)
         return "⚠️ Couldn't generate a script. Try again."
