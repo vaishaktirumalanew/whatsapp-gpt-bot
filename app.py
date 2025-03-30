@@ -88,7 +88,7 @@ Format output cleanly for WhatsApp.
 
     try:
         data = response.json()
-        return data["choices"][0]["message"]["content"] + f"
+        return data["choices"][0]["message"]["content"] + f"\n\nTo see more trending topics from r/{subreddit}, reply with \"more\"."
 
 To see more trending topics from r/{subreddit}, reply with \"more\"."
     except Exception as e:
